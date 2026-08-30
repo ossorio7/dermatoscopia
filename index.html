@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dermatoscopia en Atención Primaria</title>
+    <style>
+        :root {
+            --primary-color: #0f172a;       /* Azul marino muy oscuro / slate */
+            --primary-accent: #2563eb;      /* Azul brillante moderno */
+            --primary-light: #eff6ff;       /* Azul muy claro de fondo de selección */
+            --secondary-color: #0284c7;     /* Azul de soporte */
+            --bg-color: #f8fafc;            /* Fondo grisáceo azulado ultra limpio */
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-bottom: 75px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            color: white;
+            padding: 18px 16px;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        header h1 {
+            font-size: 1.05rem;
+            line-height: 1.35;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        main {
+            flex: 1;
+            padding: 16px;
+            max-width: 550px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border-top: 1px solid var(--border-color);
+            padding: 10px 16px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.03);
+            z-index: 100;
+        }
+
+        .btn-footer {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-footer:active {
+            background-color: var(--primary-light);
+            color: var(--primary-accent);
+            border-color: var(--primary-accent);
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .disclaimer {
+            background-color: #f0f9ff;
+            border-left: 4px solid var(--secondary-color);
+            padding: 14px;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            line-height: 1.45;
+            color: #0369a1;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+            text-align: center;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.99);
+            box-shadow: none;
+        }
+
+        /* Opciones de la primera etapa */
+        .option-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 16px 0;
+        }
+
+        .option-card {
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #ffffff;
+        }
+
+        .option-card.selected {
+            border-color: var(--primary-accent);
+            background-color: var(--primary-light);
+            box-shadow: 0 0 0 1px var(--primary-accent);
+        }
+
+        .img-placeholder {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 500;
+            color: #475569;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .option-text {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        /* Tabs de lesiones melanocíticas */
+        .tabs {
+            display: flex;
+            overflow-x: auto;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            background-color: #f1f5f9;
+            color: var(--text-muted);
+            border: none;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary-accent);
+            color: white;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Formulario y Calculadoras */
+        .calc-group {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .calc-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .calc-group select, .calc-group input[type="number"] {
+            padding: 10px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            background: #f8fafc;
+            color: var(--text-color);
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .calc-group select:focus, .calc-group input:focus {
+            border-color: var(--primary-accent);
+        }
+
+        .checkbox-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            line-height: 1.3;
+            background: #f8fafc;
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .checkbox-item:active {
+            background: var(--primary-light);
+        }
+
+        .checkbox-item input {
+            accent-color: var(--primary-accent);
+            transform: scale(1.1);
+        }
+
+        .result-box {
+            background-color: #fef2f2;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            margin-top: 16px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            text-align: center;
+        }
+
+        .result-box.normal {
+            background-color: #f0fdf4;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        ul, ol {
+            padding-left: 18px;
+            margin-top: 8px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            line-height: 1.45;
+            color: #334155;
+        }
+
+        .soyer-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8fafc;
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            margin-bottom: 8px;
+        }
+
+        .soyer-item .img-placeholder {
+            width: 48px;
+            height: 48px;
+        }
+
+        .non-melanocytic-item {
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
+        }
+
+        .non-melanocytic-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .non-melanocytic-item h3 {
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .lesion-img-container {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .lesion-img-container .img-placeholder {
+            width: 75px;
+            height: 75px;
+            border-radius: var(--radius-md);
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Dermatoscopia en Atención Primaria:<br>Diagnóstico en dos etapas</h1>
+    </header>
+
+    <main>
+
+        <!-- PÁGINA 1: Inicio -->
+        <div id="screen-home" class="screen active">
+            <div class="card">
+                <h2 style="font-size: 1.1rem; color: var(--primary-color);">Exención de Responsabilidad</h2>
+                <br>
+                <div class="disclaimer">
+                    <strong>Aviso Médico:</strong> Esta herramienta interactiva está dirigida exclusivamente a profesionales sanitarios como apoyo al diagnóstico dermatoscópico en Atención Primaria. No sustituye el juicio clínico profesional.
+                </div>
+                <button class="btn-primary" onclick="showScreen('screen-etapa1')">Empezar Primera Etapa</button>
+            </div>
+        </div>
+
+        <!-- PÁGINA 2: Primera Etapa -->
+        <div id="screen-etapa1" class="screen">
+            <div class="card">
+                <h2 style="font-size: 1.1rem; color: var(--primary-color);">Primera Etapa</h2>
+                <p style="margin-top: 6px; font-weight: 600; font-size: 0.9rem; color: var(--text-muted);">¿Cumple criterios de lesión melanocítica?</p>
+
+                <div class="option-grid">
+                    <div class="option-card" onclick="toggleOption(this)">
+                        <img src="img/patronreticular.png" alt="Ejemplo" class="img-placeholder">
+                        <span class="option-text">Patrón Reticular</span>
+                    </div>
+                    <div class="option-card" onclick="toggleOption(this)">
+                        <img src="img/patronglobular.png" alt="Ejemplo" class="img-placeholder">
+                        <span class="option-text">Patrón Globular</span>
+                    </div>
+                    <div class="option-card" onclick="toggleOption(this)">
+                        <img src="img/patron%20estrellado.png" alt="Ejemplo" class="img-placeholder">
+                        <span class="option-text">Patrón Estrellado</span>
+                    </div>
+                    <div class="option-card" onclick="toggleOption(this)">
+                        <img src="img/patronazulhomogeneo.png" alt="Ejemplo" class="img-placeholder">
+                        <span class="option-text">Patrón Azul Homogéneo</span>
+                    </div>
+                    <div class="option-card" onclick="toggleOption(this)">
+                        <img src="img/patronparalelo.png" alt="Ejemplo" class="img-placeholder">
+                        <span class="option-text">Patrón Paralelo</span>
+                    </div>
+                </div>
+
+                <button id="btn-next-step" class="btn-primary" onclick="navigateFromEtapa1()">Lesión No Melanocítica</button>
+            </div>
+        </div>
+
+        <!-- PÁGINA 3A: Lesiones Melanocíticas -->
+        <div id="screen-melanocitica" class="screen">
+            <div class="card">
+                <h2 style="font-size: 1.05rem; margin-bottom: 14px; color: var(--primary-color);">Segunda Etapa: ¿Cumple criterios de malignidad?</h2>
+                
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('tab-abcd', this)">Regla ABCD</button>
+                    <button class="tab-btn" onclick="switchTab('tab-argenziano', this)">Método Argenziano</button>
+                    <button class="tab-btn" onclick="switchTab('tab-soyer', this)">3 Puntos Soyer</button>
+                    <button class="tab-btn" onclick="switchTab('tab-menzies', this)">Regla de Menzies</button>
+                </div>
+
+                <!-- TAB 1: REGLA ABCD -->
+                <div id="tab-abcd" class="tab-content active">
+                    <h3 style="font-size: 0.95rem;">Calculadora Regla ABCD</h3>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">(A x 1.3) + (B x 0.1) + (C x 0.5) + (D x 0.5)</p>
+                    
+                    <div class="calc-group">
+                        <label>A. Asimetría (0 a 2):</label>
+                        <select id="abcd-a" onchange="calculateABCD()">
+                            <option value="0">0 - Simétrica</option>
+                            <option value="1">1 - Asimetría en 1 eje</option>
+                            <option value="2">2 - Asimetría en 2 ejes</option>
+                        </select>
+                    </div>
+
+                    <div class="calc-group">
+                        <label>B. Bordes abruptos (0 a 8):</label>
+                        <input type="number" id="abcd-b" min="0" max="8" value="0" oninput="calculateABCD()">
+                    </div>
+
+                    <div class="calc-group">
+                        <label>C. Número de Colores (1 a 6):</label>
+                        <input type="number" id="abcd-c" min="1" max="6" value="1" oninput="calculateABCD()">
+                    </div>
+
+                    <div class="calc-group">
+                        <label>D. Estructuras (1 a 5):</label>
+                        <input type="number" id="abcd-d" min="1" max="5" value="1" oninput="calculateABCD()">
+                    </div>
+
+                    <div id="res-abcd" class="result-box normal">
+                        Puntuación total: 1.80 <br><small>Baja sospecha (≤ 5.75)</small>
+                    </div>
+                    <!-- TEXTO EXPLICATIVO JUSTO DEBAJO DE LA PUNTUACIÓN -->
+                  <div style="margin-top: 14px; padding: 12px; background-color: #f8fafc; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.8rem; color: #475569; line-height: 1.4;">
+                <strong style="color: var(--primary-color); display: block; margin-bottom: 4px;">Cómo calcular cada punto:</strong>
+                    <ul style="padding-left: 16px; margin-top: 4px;">
+        <li><strong>Asimetría:</strong> Línea imaginaria que divide a la lesión en 4. 1 punto si asimetría en un eje, 2 en ambos ejes.</li>
+        <li><strong>Bordes de la lesión:</strong> Se divide a la lesión en 8 segmentos, 1 punto por cada borde abrupto.</li>
+        <li><strong>Colores:</strong> Según número de colores que presente la lesión.</li>
+          <li><strong>Determinadas estructuras:</strong>1 punto por cada estructura: puntos, glóbulos, áreas homogéneas, retículo, extensiones.</li>              
+    </ul>
+</div>
+                </div>
+
+                <!-- TAB 2: MÉTODO ARGENZIANO -->
+                <div id="tab-argenziano" class="tab-content">
+                    <h3 style="font-size: 0.95rem;">Calculadora Método Argenziano</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Seleccione los elementos presentes (Cada ítem = 1 punto):</p>
+                    
+                    <div class="checkbox-list">
+                        <label class="checkbox-item"><input type="checkbox" class="arg-check" onchange="calculateArgenziano()"> 1. Retículo pigmentado atípico</label>
+                        <label class="checkbox-item"><input type="checkbox" class="arg-check" onchange="calculateArgenziano()"> 2. Velo azul blanquecino</label>
+                        <label class="checkbox-item"><input type="checkbox" class="arg-check" onchange="calculateArgenziano()"> 3. Patrón vascular atípico</label>
+                        <label class="checkbox-item"><input type="checkbox" class="arg-check" onchange="calculateArgenziano()"> 4. Proyecciones irregulares</label>
+                        <label class="checkbox-item"><input type="checkbox" class="arg-check" onchange="calculateArgenziano()"> 5. Estructuras de regresión</label>
+                        <label class="checkbox-item"><input type="checkbox" class="arg-check" onchange="calculateArgenziano()"> 6. Mancha de pigmento asimétrica</label>
+                        <label class="checkbox-item"><input type="checkbox" class="arg-check" onchange="calculateArgenziano()"> 7. Puntos y glóbulos irregulares</label>
+                    </div>
+
+                    <div id="res-argenziano" class="result-box normal">
+                        Puntuación: 0 puntos<br><small>Sin criterios suficientes</small>
+                    </div>
+                </div>
+
+                <!-- TAB 3: 3 PUNTOS DE SOYER -->
+                <!-- TAB 3: 3 PUNTOS DE SOYER -->
+<div id="tab-soyer" class="tab-content">
+    <h3 style="font-size: 0.95rem;">Regla de los 3 Puntos de Soyer</h3>
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Seleccione los criterios presentes:</p>
+    <br>
+
+    <!-- ÍTEM 1 -->
+    <div class="soyer-item">
+        <img src="img/asimetria.png" alt="Asimetría del contenido" class="img-placeholder">
+        <label class="checkbox-item" style="background:transparent; border:none; padding:0; flex:1;">
+            <input type="checkbox" class="soyer-check" onchange="calculateSoyer()"> 1. Asimetría del contenido
+        </label>
+    </div>
+
+    <!-- ÍTEM 2 -->
+    <div class="soyer-item">
+        <img src="img/atipico.png" alt="Patrón reticular atípico" class="img-placeholder">
+        <label class="checkbox-item" style="background:transparent; border:none; padding:0; flex:1;">
+            <input type="checkbox" class="soyer-check" onchange="calculateSoyer()"> 2. Patrón reticular atípico
+        </label>
+    </div>
+
+    <!-- ÍTEM 3 -->
+    <div class="soyer-item">
+        <img src="img/veloazul.png" alt="Velo azul blanquecino" class="img-placeholder">
+        <label class="checkbox-item" style="background:transparent; border:none; padding:0; flex:1;">
+            <input type="checkbox" class="soyer-check" onchange="calculateSoyer()"> 3. Velo azul blanquecino
+        </label>
+    </div>
+
+    <div id="res-soyer" class="result-box normal">
+        Puntuación: 0 puntos<br><small>Baja sospecha (&lt; 2)</small>
+    </div>
+</div>
+                <!-- TAB 4: REGLA DE MENZIES -->
+                <div id="tab-menzies" class="tab-content">
+                    <h3 style="font-size: 0.95rem;">Regla de Menzies</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 4px 0 10px 0;">Requiere ≥ 1 Criterio Positivo y 0 Criterios Negativos.</p>
+
+                    <strong style="color: #b91c1c; font-size: 0.85rem;">1. Criterios Negativos (NO debe haber):</strong>
+                    <div class="checkbox-list">
+                        <label class="checkbox-item"><input type="checkbox" class="menzies-neg" onchange="calculateMenzies()"> Monocromía</label>
+                        <label class="checkbox-item"><input type="checkbox" class="menzies-neg" onchange="calculateMenzies()"> Patrón simétrico</label>
+                    </div>
+
+                    <strong style="color: #15803d; font-size: 0.85rem;">2. Criterios Positivos (Al menos 1):</strong>
+                    <div class="checkbox-list">
+                        <label class="checkbox-item"><input type="checkbox" class="menzies-pos" onchange="calculateMenzies()"> Velo azul-blanco</label>
+                        <label class="checkbox-item"><input type="checkbox" class="menzies-pos" onchange="calculateMenzies()"> Puntos marrones</label>
+                        <label class="checkbox-item"><input type="checkbox" class="menzies-pos" onchange="calculateMenzies()"> Seudópodos / Proyecciones radiales</label>
+                        <label class="checkbox-item"><input type="checkbox" class="menzies-pos" onchange="calculateMenzies()"> Despigmentación pseudocicatrizal</label>
+                        <label class="checkbox-item"><input type="checkbox" class="menzies-pos" onchange="calculateMenzies()"> Puntos/glóbulos negros periféricos</label>
+                        <label class="checkbox-item"><input type="checkbox" class="menzies-pos" onchange="calculateMenzies()"> Puntos en pimienta (azul-gris)</label>
+                        <label class="checkbox-item"><input type="checkbox" class="menzies-pos" onchange="calculateMenzies()"> Retículo pigmentado prominente</label>
+                        <label class="checkbox-item"><input type="checkbox" class="menzies-pos" onchange="calculateMenzies()"> Policromía (≥5 colores de 6 posibles)</label>
+                    </div>
+
+                    <div id="res-menzies" class="result-box normal">
+                        Resultado: Negativo<br><small>No cumple criterios para Melanoma</small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- PÁGINA 3B: Lesiones No Melanocíticas -->
+        <div id="screen-no-melanocitica" class="screen">
+    <div class="card">
+        <h2 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--primary-color);">Lesiones No Melanocíticas</h2>
+
+        <div class="non-melanocytic-item">
+            <h3>Queratosis Seborreica</h3>
+            <div class="lesion-img-container">
+                <img src="img/queratosisseborreica.png" alt="Queratosis Seborreica 1" class="img-placeholder">
+                <img src="img/cerebriforme.png" alt="Queratosis Seborreica 2" class="img-placeholder">
+            </div>
+            <ul>
+                <li>Quistes de milium</li>
+                <li>Tapones córneos o pseudoaperturas foliculares</li>
+                <li>Fisuras, crestas (patrón cerebriforme)</li>
+                <li>Pseudo-velo azul-blanquecino</li>
+                <li>Pseudo-retículo pigmentado en regiones faciales</li>
+            </ul>
+        </div>
+
+        <div class="non-melanocytic-item">
+            <h3>Dermatofibroma</h3>
+            <div class="lesion-img-container">
+                <img src="img/dermaqtofibroma.png" alt="Dermatofibroma" class="img-placeholder">
+            </div>
+            <ul>
+                <li>Parche blanco central</li>
+                <li>Retículo fino periférico</li>
+            </ul>
+        </div>
+
+        <div class="non-melanocytic-item">
+            <h3>Lesiones Vasculares</h3>
+            <div class="lesion-img-container">
+                <img src="img/vascular.png" alt="Lesión Vascular" class="img-placeholder">
+            </div>
+            <ul>
+                <li>Áreas rojo azuladas (lagunas)</li>
+            </ul>
+        </div>
+
+        <div class="non-melanocytic-item">
+            <h3>Carcinoma Basocelular</h3>
+            <p style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Ausencia de retículo pigmentado + 1 de los siguientes:</p>
+            <div class="lesion-img-container">
+                <img src="img/baso1.png" alt="Carcinoma Basocelular 1" class="img-placeholder">
+                <img src="img/baso2.png" alt="Carcinoma Basocelular 2" class="img-placeholder">
+                <img src="img/baso3.png" alt="Carcinoma Basocelular 3" class="img-placeholder">
+                <img src="img/carcinomabasocelular.png" alt="Carcinoma Basocelular 3" class="img-placeholder">
+            </div>
+            <ul>
+                <li><strong>Nidos ovoides azul-gris:</strong> Estructuras pigmentadas ovoides y alargadas.</li>
+                <li><strong>Teleangiectasias:</strong> Vasos rojo brillante ramificados.</li>
+                <li><strong>Hojas de arce:</strong> Extensiones bulbosas en la periferia.</li>
+                <li><strong>Ruedas de carro:</strong> Proyecciones radiales desde un eje central.</li>
+                <li><strong>Ulceración:</strong> Pérdida total de la epidermis.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <!-- PÁGINA 4: Enlaces -->
+        <div id="screen-links" class="screen">
+            <div class="card">
+                <h2 style="font-size: 1.1rem; color: var(--primary-color);">Enlaces de Interés</h2>
+                <br>
+                <ul>
+                    <li><a href="https://www.semergen.es" target="_blank" style="color: var(--primary-accent); text-decoration: none; font-weight: 500;">SEMERGEN - Sociedad Española de Médicos de Atención Primaria</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER MODERNO COMPACTO -->
+    <footer>
+        <button class="btn-footer" onclick="resetAlgorithm()">🔄 Reiniciar</button>
+        <button class="btn-footer" onclick="showScreen('screen-links')">🔗 Enlaces de interés</button>
+    </footer>
+
+    <script>
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function toggleOption(cardElement) {
+            cardElement.classList.toggle('selected');
+            
+            const selectedCount = document.querySelectorAll('.option-card.selected').length;
+            const btnNext = document.getElementById('btn-next-step');
+
+            if (selectedCount > 0) {
+                btnNext.textContent = "Lesión Melanocítica";
+            } else {
+                btnNext.textContent = "Lesión No Melanocítica";
+            }
+        }
+
+        function navigateFromEtapa1() {
+            const selectedCount = document.querySelectorAll('.option-card.selected').length;
+            if (selectedCount > 0) {
+                showScreen('screen-melanocitica');
+            } else {
+                showScreen('screen-no-melanocitica');
+            }
+        }
+
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+        }
+
+        /* --- CÁLCULOS EN TIEMPO REAL --- */
+
+        function calculateABCD() {
+            const a = parseFloat(document.getElementById('abcd-a').value) || 0;
+            const b = Math.min(8, Math.max(0, parseFloat(document.getElementById('abcd-b').value) || 0));
+            const c = Math.min(6, Math.max(1, parseFloat(document.getElementById('abcd-c').value) || 1));
+            const d = Math.min(5, Math.max(1, parseFloat(document.getElementById('abcd-d').value) || 1));
+
+            const total = (a * 1.3) + (b * 0.1) + (c * 0.5) + (d * 0.5);
+            const resBox = document.getElementById('res-abcd');
+
+            if (total > 5.75) {
+                resBox.className = "result-box";
+                resBox.innerHTML = `Puntuación total: ${total.toFixed(2)}<br><small>⚠️ SUGIERE MELANOMA (> 5.75)</small>`;
+            } else {
+                resBox.className = "result-box normal";
+                resBox.innerHTML = `Puntuación total: ${total.toFixed(2)}<br><small>Baja sospecha (≤ 5.75)</small>`;
+            }
+        }
+
+        function calculateArgenziano() {
+            const checks = document.querySelectorAll('.arg-check:checked').length;
+            const resBox = document.getElementById('res-argenziano');
+
+            if (checks >= 1) {
+                resBox.className = "result-box";
+                resBox.innerHTML = `Puntuación: ${checks} punto(s)<br><small>🚨 &ge; 1 &rarr; DERMATOLOGÍA / EXÉRESIS</small>`;
+            } else {
+                resBox.className = "result-box normal";
+                resBox.innerHTML = `Puntuación: 0 puntos<br><small>Sin criterios suficientes</small>`;
+            }
+        }
+
+        function calculateSoyer() {
+            const checks = document.querySelectorAll('.soyer-check:checked').length;
+            const resBox = document.getElementById('res-soyer');
+
+            if (checks >= 2) {
+                resBox.className = "result-box";
+                resBox.innerHTML = `Puntuación: ${checks} punto(s)<br><small>🚨 &ge; 2 ALTA SOSPECHA</small>`;
+            } else {
+                resBox.className = "result-box normal";
+                resBox.innerHTML = `Puntuación: ${checks} punto(s)<br><small>Baja sospecha (< 2)</small>`;
+            }
+        }
+
+        function calculateMenzies() {
+            const negChecks = document.querySelectorAll('.menzies-neg:checked').length;
+            const posChecks = document.querySelectorAll('.menzies-pos:checked').length;
+            const resBox = document.getElementById('res-menzies');
+
+            if (negChecks === 0 && posChecks >= 1) {
+                resBox.className = "result-box";
+                resBox.innerHTML = `Resultado: POSITIVO<br><small>⚠️ SUGIERE MELANOMA (Sin criterios neg. + ≥1 pos.)</small>`;
+            } else {
+                resBox.className = "result-box normal";
+                let motivo = negChecks > 0 ? "Presencia de criterio(s) negativo(s)" : "Falta criterio positivo";
+                resBox.innerHTML = `Resultado: Negativo<br><small>${motivo}</small>`;
+            }
+        }
+
+        function resetAlgorithm() {
+            document.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
+            document.querySelectorAll('input[type="checkbox"]').forEach(chk => chk.checked = false);
+            document.getElementById('abcd-a').value = "0";
+            document.getElementById('abcd-b').value = "0";
+            document.getElementById('abcd-c').value = "1";
+            document.getElementById('abcd-d').value = "1";
+            document.getElementById('btn-next-step').textContent = "Lesión No Melanocítica";
+
+            calculateABCD();
+            calculateArgenziano();
+            calculateSoyer();
+            calculateMenzies();
+
+            showScreen('screen-home');
+        }
+    </script>
+</body>
+</html>
