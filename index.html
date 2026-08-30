@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- Icono para iPhone -->
+<link rel="apple-touch-icon" href="img/icon-180.png">
+
+<!-- Manifest de la aplicación -->
+<link rel="manifest" href="/manifest.json">
+
+<!-- Configuración para iOS -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Dermatoscopia">
+
+<meta name="theme-color" content="#16395c">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dermatoscopia en Atención Primaria</title>
@@ -101,7 +113,6 @@
 
         .screen.active {
             display: block;
-            text-align: center;
         }
 
         .card {
@@ -386,7 +397,7 @@
                 <h2 style="font-size: 1.1rem; color: var(--primary-color);">Exención de Responsabilidad</h2>
                 <br>
                 <div class="disclaimer">
-                    <strong>Aviso:</strong> Esta herramienta está dirigida exclusivamente a profesionales sanitarios como apoyo al diagnóstico dermatoscópico en Atención Primaria. No sustituye el juicio clínico profesional.
+                    <strong>Aviso Médico:</strong> Esta herramienta interactiva está dirigida exclusivamente a profesionales sanitarios como apoyo al diagnóstico dermatoscópico en Atención Primaria. No sustituye el juicio clínico profesional.
                 </div>
                 <button class="btn-primary" onclick="showScreen('screen-etapa1')">Empezar Primera Etapa</button>
             </div>
